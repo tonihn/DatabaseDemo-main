@@ -91,6 +91,36 @@ namespace WebStore.Migrations
                     b.ToTable("addresses", (string)null);
                 });
 
+            modelBuilder.Entity("WebStore.Entities.Carrier", b =>
+                {
+                    b.Property<int>("CarrierId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CarrierId"));
+
+                    b.Property<string>("CarrierName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("carrier_name");
+
+                    b.Property<string>("ContactPhone")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("contact_phone");
+
+                    b.Property<string>("ContactUrl")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("contact_url");
+
+                    b.HasKey("CarrierId")
+                        .HasName("carriers_pkey");
+
+                    b.ToTable("carriers", (string)null);
+                });
+
             modelBuilder.Entity("WebStore.Entities.Category", b =>
                 {
                     b.Property<int>("CategoryId")
@@ -177,9 +207,16 @@ namespace WebStore.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("billing_address_id");
 
+                    b.Property<int?>("CarrierId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("CustomerId")
                         .HasColumnType("integer")
                         .HasColumnName("customer_id");
+
+                    b.Property<DateTime?>("DeliveredDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("delivered_date");
 
                     b.Property<DateTime?>("OrderDate")
                         .HasColumnType("timestamp without time zone")
@@ -190,14 +227,25 @@ namespace WebStore.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("order_status");
 
+                    b.Property<DateTime?>("ShippedDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("shipped_date");
+
                     b.Property<int>("ShippingAddressId")
                         .HasColumnType("integer")
                         .HasColumnName("shipping_address_id");
+
+                    b.Property<string>("TrackingNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("tracking_number");
 
                     b.HasKey("OrderId")
                         .HasName("orders_pkey");
 
                     b.HasIndex("BillingAddressId");
+
+                    b.HasIndex("CarrierId");
 
                     b.HasIndex("CustomerId");
 
@@ -449,6 +497,11 @@ namespace WebStore.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_orders_billing_address");
 
+                    b.HasOne("WebStore.Entities.Carrier", "Carrier")
+                        .WithMany("Orders")
+                        .HasForeignKey("CarrierId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("WebStore.Entities.Customer", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId")
@@ -464,6 +517,8 @@ namespace WebStore.Migrations
                         .HasConstraintName("fk_orders_shipping_address");
 
                     b.Navigation("BillingAddress");
+
+                    b.Navigation("Carrier");
 
                     b.Navigation("Customer");
 
@@ -529,6 +584,11 @@ namespace WebStore.Migrations
                     b.Navigation("OrderBillingAddresses");
 
                     b.Navigation("OrderShippingAddresses");
+                });
+
+            modelBuilder.Entity("WebStore.Entities.Carrier", b =>
+                {
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("WebStore.Entities.Category", b =>
